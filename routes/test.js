@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 
 
-var dentist = require('../models/dentist')
 router.get('/test', function (req,res,next){
     console.log('test works')
     res.send('get test')
