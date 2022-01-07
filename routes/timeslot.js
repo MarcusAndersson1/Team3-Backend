@@ -1,5 +1,5 @@
 var mqtt = require('mqtt')
-var client  = mqtt.connect('ws://127.0.0.1:9001') 
+var client  = mqtt.connect('tcp://127.0.0.1:1883') 
 var express = require('express');
 var router = express.Router();
 var maxTries = 10
