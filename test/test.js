@@ -2,20 +2,46 @@ const request = require('supertest');
 const app = require('../app');
 
 // https://www.npmjs.com/package/supertest
-describe('App', function() {
-  it('Status code and response', function(done) {
+describe('GET /users', function() {
+  it('Correct return type', function(done) {
     request(app)
-      .get('/test')
-      .expect(/get test/)
-      .expect('Content-Type', /text/)
+      .get('/users')
+      .expect('Content-Type', 'application/json; charset=utf-8', done)
+  });
+}); 
+
+describe('GET /users', function() {
+  it('Correct status code (Success)', function(done) {
+    request(app)
+      .get('/users')
       .expect(200, done);
   });
 }); 
 
-describe('App', function() {
-  it('Correct response', function(done) {
+describe('GET /userss', function() {
+  it('Correct status code (Error)', function(done) {
     request(app)
-      .post('/test')
-      .expect(/post test/, done);
+      .get('/userss')
+      .expect(404, done);
   });
 }); 
+
+describe('POST /user/login', function() {
+  it('Expect successfull login', function(done) {
+    request(app)
+      .post('/users/login')
+      .send({email:'hej', password:'hej'})
+      .set('Accept', 'application/json')
+      .expect(200, done);
+  });
+});
+
+describe('POST /user/login', function() {
+  it('Expect error on login', function(done) {
+    request(app)
+      .post('/users/login')
+      .send({email:'asdfasdf', password:'hej'})
+      .set('Accept', 'application/json')
+      .expect(400, done);
+  });
+});
