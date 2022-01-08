@@ -24,10 +24,12 @@ router.get('/timeslots/:id', async function(req, res, next) {
     res.json(result)
   });
 
+client.subscribe('/timeslots/book/response')
+
 async function bookTimeHelper(id){
     tryCount = 0
     currentId = id
-    client.subscribe('/timeslots/book/'+id)
+    client.subscribe('/timeslots/book/response')
     for(i=0;i <= maxTries;i++){
         await timer(100)
         bookTime(id)
@@ -35,7 +37,7 @@ async function bookTimeHelper(id){
     }
     console.log("after")
     if (!messageRecieved){
-        return '400'
+        return '404'
     }else{
         messageRecieved = false
         return '200'
@@ -43,24 +45,31 @@ async function bookTimeHelper(id){
 }
 
 
-async function bookTime(id){
-   client.publish('/timeslots/book/',id)
+async function bookTime(clinicId, timeslotId){
+    let message = `${clinicId}` + " " + `${timeslotId}`
+    console.log(message)
+   client.publish('/timeslots/book/',message)
 }
-
+client.on('connect', function(){
+    console.log('Client has subscribed successfully')
+})
 client.on('message', async function (topic, message) {
-    if (message == '200'){
+    let statusCode = message.toString()
+    if (statusCode == '200'){
         messageRecieved = true
         i = maxTries
-        client.unsubscribe('/timeslots/book/'+currentId)
+        console.log(statusCode)
+        client.unsubscribe('/timeslots/book/')
         
     }
-    else if (message == '400'){
+    else if (statusCode == '404' || message == '403'){
         messageRecieved = true
         i = maxTries
-        client.unsubscribe('/timeslots/book/'+currentId)
+        console.log(statusCode)
+        client.unsubscribe('/timeslots/book/')
     }
-    else{ 
-            client.unsubscribe('/timeslots/book/'+currentId)
+    else { 
+            client.unsubscribe('/timeslots/book/')
         }
     if(topic == '/timeslots/all/'){
         console.log("meddelande")
@@ -83,5 +92,6 @@ async function getAll(){
     }
     return times
 }
+bookTime("61d8203942783868569c9382","61d8203942783868569c9388")
 
 module.exports = router;
