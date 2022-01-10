@@ -18,5 +18,6 @@ If you open this project in Gitpod, you'll get all Node dependencies pre-install
 
 ### Installation
 Into the console, type the following:
-`npm install`
-`npm start`
+1. `npm install`
+
+2. `npm start`
