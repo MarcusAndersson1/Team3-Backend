@@ -16,8 +16,8 @@ This template has a fully-automated dev setup for [Gitpod](https://docs.gitlab.c
 
 If you open this project in Gitpod, you'll get all Node dependencies pre-installed and Express will open a web preview.
 
-### Installation
-Into the console, type the following:
+### Running
+Into the terminal, type the following:
 1. `npm install`
 
 2. `npm start`
