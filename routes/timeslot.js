@@ -5,7 +5,7 @@ var router = express.Router();
 var maxTries = 10
 var messageRecieved = false
 var tryCount
-var currentId
+var status
 const timer = ms => new Promise(res => setTimeout(res, ms))
 var i = 0;
 var q = 0;
@@ -24,7 +24,11 @@ router.get('/timeslots/', async function (req, res, next) {
     res.json(result)
 });
 
-
+router.patch('/timeslots/', async function (req, res){
+    console.log(req.body)
+    let result = await bookTimeHelper(req.body.clinic, req.body.timeslot)
+    res.json(result)
+});
 
 async function bookTimeHelper(clinicId, timeslotId) {
     tryCount = 0
@@ -32,15 +36,14 @@ async function bookTimeHelper(clinicId, timeslotId) {
     for (i = 0; i <= maxTries; i++) {
         await timer(100)
         bookTime(clinicId, timeslotId)
-
     }
     if (!messageRecieved) {
         console.log("Message not recieved, unsubscribing")
-        return "Message not recieved"
+        return 500
     } else {
         messageRecieved = false
         console.log("Message Recieved")
-        return "Message recieved"
+        return status
     }
 }
 
@@ -56,20 +59,26 @@ client.on('connect', function () {
 client.on('message', async function (topic, message) {
     let statusCode = message.toString()
     if (statusCode == '200') {
+        status = 200
         messageRecieved = true
         i = maxTries
         console.log(statusCode)
-        client.unsubscribe('/timeslots/book/')
+        client.unsubscribe('/timeslots/book/response')
 
     }
-    else if (statusCode == '404' || statusCode == '403') {
+    else if (statusCode == '404') {
+        status = 404
         messageRecieved = true
         i = maxTries
         console.log(statusCode)
-        client.unsubscribe('/timeslots/book/')
+        client.unsubscribe('/timeslots/book/response')
     }
-    else {
-        client.unsubscribe('/timeslots/book/')
+    else if (statusCode == '403') {
+        status = 403
+        messageRecieved = true
+        i = maxTries
+        console.log(statusCode)
+        client.unsubscribe('/timeslots/book/response')
     }
     if (topic == '/timeslots/all/') {
         const timeslots = await parseJson(message)
@@ -91,6 +100,5 @@ async function getAll() {
     }
     return times
 }
-bookTimeHelper("61d8203942783868569c9382", "61d8203942783868569c9393")
 
 module.exports = router;
